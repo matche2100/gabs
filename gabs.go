@@ -360,6 +360,55 @@ func (g *Container) Merge(toMerge *Container) error {
 	return nil
 }
 
+func (g *Container) MergeWithOverWrite(toMerge *Container) error {
+	var recursiveFnc func(map[string]interface{}, []string) error
+	recursiveFnc = func(mmap map[string]interface{}, path []string) error {
+		for key, value := range mmap {
+			newPath := append(path, key)
+			if g.Exists(newPath...) {
+				target := g.Search(newPath...)
+				switch t := value.(type) {
+				case map[string]interface{}:
+					switch targetV := target.Data().(type) {
+					case map[string]interface{}:
+						if err := recursiveFnc(t, newPath); err != nil {
+							return err
+						}
+					case []interface{}:
+						g.Set(t, newPath...)
+					default:
+						//newSlice := append([]interface{}{}, targetV)
+						g.Set(t, newPath...)
+					}
+				case []interface{}:
+					for _, valueOfSlice := range t {
+						if err := g.ArrayAppend(valueOfSlice, newPath...); err != nil {
+							return err
+						}
+					}
+				default:
+					switch targetV := target.Data().(type) {
+					case []interface{}:
+						g.Set(t, newPath...)
+					default:
+						newSlice := append([]interface{}{}, targetV)
+						g.Set(t, newPath...)
+					}
+				}
+			} else {
+				// path doesn't exist. So set the value
+				if _, err := g.Set(value, newPath...); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	}
+	if mmap, ok := toMerge.Data().(map[string]interface{}); ok {
+		return recursiveFnc(mmap, []string{})
+	}
+	return nil
+}
 //--------------------------------------------------------------------------------------------------
 
 /*
