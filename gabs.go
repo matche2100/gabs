@@ -369,7 +369,7 @@ func (g *Container) MergeWithOverWrite(toMerge *Container) error {
 				target := g.Search(newPath...)
 				switch t := value.(type) {
 				case map[string]interface{}:
-					switch targetV := target.Data().(type) {
+					switch target.Data().(type) {
 					case map[string]interface{}:
 						if err := recursiveFnc(t, newPath); err != nil {
 							return err
@@ -391,7 +391,7 @@ func (g *Container) MergeWithOverWrite(toMerge *Container) error {
 					case []interface{}:
 						g.Set(t, newPath...)
 					default:
-						newSlice := append([]interface{}{}, targetV)
+						//newSlice := append([]interface{}{}, targetV)
 						g.Set(t, newPath...)
 					}
 				}
