@@ -387,7 +387,7 @@ func (g *Container) MergeWithOverWrite(toMerge *Container) error {
 						}
 					}
 				default:
-					switch targetV := target.Data().(type) {
+					switch target.Data().(type) {
 					case []interface{}:
 						g.Set(t, newPath...)
 					default:
